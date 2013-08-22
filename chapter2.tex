@@ -182,9 +182,17 @@ degree of the sequence.
   listings/core_erlang_records/c_literal.erl
 }
 
-
 \emph{Atomic literal} (Listing~\ref{lst:core_erlang_c_literal}).
 The c\textunderscore literal record holds a  literal and represents the Erlang value denoted
 by that literal.
 
 
+\includecode[erlang]{lst:core_erlang_c_var}{The c\textunderscore var record definition}{%
+  listings/core_erlang_records/c_var.erl
+}
+
+\emph{Variable name} (Listing~\ref{lst:core_erlang_c_var}).
+The name field can be an integer() or an atom() (variable’s name) or a \{atom(),
+integer()\} (function’s name and arity). It evaluates to the value that is bound
+to the variable or function in the current environment. We should mention that
+when it comes to a function, the value that we expect is a closure.
