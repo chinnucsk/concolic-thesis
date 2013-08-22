@@ -1,0 +1,53 @@
+\chapter{Introduction}\label{ch:introduction}
+
+In a world where software is everywhere from space shuttles to insulin pumps,
+software testing have a prominent role. Unreliable software can potentially
+cause human loss and incur huge monetary costs for the industries. Therefore,
+companies spend a large amount of their development budget to ensure the quality
+and reliability their software.
+
+Many software testing techniques have been developed and used over the years. A
+notion that has become increasingly popular in the research community is
+automated software testing. Techniques that provide automatic static or dynamic
+analysis on a give code base have garnered a lot of attention and tools that
+implement them are being used daily both in academia and the real-world
+software industry. Such testing tools have been successfully developed for the
+Erlang language.
+
+However, software testing is largely still manual since an effective test suite
+must consist of inputs that exercise the program in different ways and achieve
+high code coverage. This a very difficult goal to achieve with automated
+black-box tools (which comprise the majority of automated software testing
+tools), thus test engineers resort to manual unit testing which is very
+expensive and time consuming. In addition, bugs may occur at irregular inputs
+that may take place in very rare but plausible conditions which test engineers
+may not foresee.
+
+As part of this thesis, we have explored ways of implementing a dynamic
+white-box technique for the Erlang language that generates inputs for the
+program using the program’s code. This technique is called concolic testing and
+combines concrete and symbolic execution of a program. The key idea is that
+given a program and a random input, we record how the input affects the control
+flow of the execution and create a conjunctive logical formula that if an input
+satisfies we know that the execution will go along the same path. Then, we use
+a constraint solver to negate a term of the formula and generate a new input
+for our program that we expect to drive the execution along a different path.
+We then iteratively do the same process and hopefully enumerate all the
+execution paths of our program.
+
+This technique has already been implemented for imperative and object-oriented
+languages such as Java and C. All these tools use a low level representation of
+the program’s code, like Assembly or LLVM, thus limiting the expressiveness of
+the constraint solver. We decided that we wanted to investigate the
+effectiveness of using a high level representation of Erlang for our tool and
+enhance the expressiveness of the language used to interface with the
+constraint solver. Therefore, we decided to create the tool from scratch and
+not use an existing symbolic execution engine, like KLEE, and we named it
+<NAME>. The constraint solver we used is Z3 from Microsoft Reasearch.
+
+Moreover, the current implementation of <NAME> supports sequential programs and
+a subset of the Erlang language’s type system.
+
+\textbf{Outline of the Thesis}
+
+The thesis is organized as follows:

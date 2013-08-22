@@ -1,0 +1,68 @@
+\chapter{The Erlang/OTP System}\label{ch:erlang_otp_system}
+
+\section{The Erlang Language}\label{sec:erlang_lang}
+
+Erlang is a programming language designed at the Ericsson Computer Science
+Laboratory in the 1980’s. It was initially used for developing software for
+telecommunications systems. Erlang was released as open source in 1998 and is
+mainly being used in domains such as banking, e-commerce, computer telephony
+and instant messaging.
+
+The designers of Erlang decided that they wanted a language that would be
+suitable for the development of massively scalable and robust distributed
+systems that would be fault-tolerant and would ensure high availability.
+
+The scalability and robustness were achieved by having lightweight processes
+that conformed to the actor model. When an Erlang process is spawned, it uses a
+minimum amount of system resources and can request additional ones as needed.
+The actor model suggests that every process can only communicate with one
+another process through asynchronous message-passing sent into the receiver’s
+mailbox. Every communication is explicit, traceable and safe. This approach
+greatly facilitates code debugging in concurrent applications.
+
+Fault tolerance is a controversial topic since it has different meaning to
+people. For example, to some it may mean that no process ever fails and no data
+is ever lost. However, fault tolerance in Erlang is that the critical core of a
+system does not crash. Surely some processes may fail and their data may be
+lost but the system will continue to be running despite these events. Adding
+the on-the-fly code loading feature to that we get a language that supports the
+development of always-on systems.
+
+Erlang is a strict and dynamically-typed language. The programmer is not
+obliged to statically annotate his code in any way with type information.
+However, type safety is ensured by the runtime environment that catches the
+occurring type error, at which point an exception would be raised in the
+execution of the program. This allows for more flexible code and is essential
+for the fault-tolerant behavior that Erlang provides.
+
+A vital part of the Erlang implementation is the OTP framework. It is a set of
+Erlang libraries and design principles providing middle-ware to develop Erlang
+applications. It includes its own distributed database, applications to
+interface towards other languages, debugging and release handling tools~\cite{erlang_site}.
+
+
+\section{The Erlang Compiler}\label{sec:erlang_compiler}
+
+Erlang is primarily a compiled language. The code of an application is
+organized in modules which are independently compiled and loaded to the runtime
+system. The Ericsson Erlang implementation uses a register-based virtual
+machine which is called BEAM Virtual Machine as the runtime system. It uses
+BEAM bytecode and converts it to threaded code at load time.
+
+The conversion of the textual representation of the Erlang code to BEAM
+bytecode is done by the compiler. The first step in this process is to parse
+the text file and create the Abstract Syntax Tree (AST) of the module. Erlang
+code is quite expressive and has a lot of syntactic sugar in it, therefore a
+major transformation occurs that translates the Erlang syntax tree to Core
+Erlang syntax tree. Core Erlang is an intermediate high level language that we
+will present extensively in the next section. This representation is more
+concise with explicit scopes.
+
+The next big transformation is from Core Erlang to the BEAM bytecode
+representation. This register-based representation is poorly documented as well
+as less comprehensive than Core Erlang, which was one of the reasons why we
+wanted to work with Core Erlang rather than BEAM bytecode. The next step is to
+run some optimization passes on the bytecode and then convert it to threaded
+code and load it to the virtual machine and prepare it for execution.
+
+
