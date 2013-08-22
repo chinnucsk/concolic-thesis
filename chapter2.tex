@@ -66,3 +66,125 @@ run some optimization passes on the bytecode and then convert it to threaded
 code and load it to the virtual machine and prepare it for execution.
 
 
+\section{Core Erlang}\label{sec:core_erlang}
+
+As we mentioned before, Core Erlang is an intermediate representation of
+Erlang, which is used by the compiler as a middle-ware tier between the textual
+representation of the source code and the intermediate code. It has clear and
+simple semantics that allow for a straight forward translation from Erlang code
+to Core Erlang code and from Core Erlang code to Intermediate code. It is a
+high level but concise language that opts for human readability. It has a
+simple grammar thus simplifying the process of pretty printing Core Erlang
+programs for humans to read and edit. Its main goal is to facilitate the
+development of tools that operate on the Erlang source code, such as profilers,
+debuggers, source code optimizers and various programs that perform source code
+instrumentations.
+
+The current implementation of the Erlang compiler allows the programmer to
+transform his program to the equivalent Core Erlang program and store its
+textual representation. He can then read it to inspect or modify the code
+transformation or even write some extra Core Erlang code by hand. However,
+should he want to execute his code, he must compile it to BEAM bytecode and
+then execute it as usual. There is no implementation of a Core Erlang
+interpreter, even for debugging purposes, as there is for the Abstract Format
+of the Erlang parse trees stored in the debugging information of a module. This
+feature was necessary for our implementation, thus a major part of the
+development cycle of our tool was dedicated to the creation of a reliable Core
+Erlang interpreter.
+
+In the rest of this section, we will provide a brief description of the Core
+Erlang Abstract Syntax Tree as it is used in the Erlang compiler and its
+semantics.
+
+\subsection{The Core Erlang Abstract Syntax Tree}\label{sub:core_erlang_ast}
+
+The Core Erlang Abstract Syntax Tree has a dual representation in the Erlang
+compiler. The core parts of the compiler use the records defined in the file
+lib/compiler/core\textunderscore parse.hrl, whereas cerl\textunderscore inline and all the modules in
+lib/hipe/cerl use the Abstract Data Type defined in lib/compiler/cerl.erl.
+Essentially, both definitions are the same and can be used interchangeably so
+the decision on which representation to use boils down to the personal
+preference and style of the programmer. The records’ representation allows for
+easier decomposition of the syntax tree nodes by using pattern matching whereas
+the ADT representation offers a more formal approach that favors parse
+transformations. We decided to use the records’ representation as pattern
+matching greatly facilitates our implementation of the Core Erlang interpreter.
+
+We feel that since the lexical analysis and grammar of Core Erlang are
+presented in detail in the Core Erlang language specification paper, we should
+rather present the undocumented definitions of the Core Erlang Abstract Syntax
+Tree in lib/compiler/core\textunderscore parse.hrl and discuss their semantics in the context
+of their current usage in the Erlang compiler. First of all, let’s note some
+principles that will apply for the rest of the subsection and continue to
+present the AST records.
+
+\begin{itemize}
+  \item A Core Erlang AST is considered to be of type Tree which is a union of
+    all the records we will describe.
+  \item All the records have the c\textunderscore  prefix.
+  \item A special case is the record c\textunderscore def. Well, it is not a record per se,
+    but it is mentioned as one in core\textunderscore parse.hrl to denote the type of some
+    record fields. It actually is a tuple of two elements, let’s say \{T1, T2\},
+    Where T1 and T2 are of type Tree. It is used when we want to show that T1
+    is defined by T2. We will see its exact uses as we describe the records in
+    core\textunderscore parse.hrl.
+  \item Every record has an annotation field which is initialized to the empty
+    list. Annotations are a list of associations between constant literals and
+    a phrase. They are optional and their interpretation is implementation
+    dependent. For simplicity, we will always have an empty annotation list in
+    our records.
+  \item We will mention the term environment. An environment is simply a
+    mapping from names to Erlang values. Every expression is evaluated in a
+    given environment that binds variables and functions to their values.
+  \item Every evaluation of an expression can terminate normally and yield a
+    sequence of values or end unexpectedly and yield an exception.
+\end{itemize}
+
+\subsubsection{Root node of a syntax tree}
+
+\includecode[erlang]{lst:core_erlang_c_module}{The c\textunderscore module record definition}{%
+  listings/core_erlang_records/c_module.erl
+}
+
+The root of a syntax tree will always be a c\textunderscore module record (Listing~\ref{lst:core_erlang_c_module}). The basic unit that
+is compiled is a module, a single source code file that consists of the module
+name, the list of exported functions, some optional attributes, such as type
+definitions and function specifications, and the definitions of the exported
+and internal functions. 
+
+As we see, these correspond with the fields of the c\textunderscore module record. The name
+field is always a c\textunderscore literal record that holds the name of the module. The
+exports field is a list of c\textunderscore var records that hold the names and arities of the
+exported functions. The attrs field is a list of the aforementioned c\textunderscore def
+constructs. In this case, each c\textunderscore def consists of two c\textunderscore literal records. The
+first one denotes the type of attribute (spec, type etc.) and the second one
+its definition. The interpretation of module attributes is implementation
+specific and we will discuss it in detail in the chapter <ENTER CHAPTER>. The
+defs field is also a list of c\textunderscore def constructs. The first element of each c\textunderscore def
+is a c\textunderscore var record that represents the name and arity of the defined function.
+The second element is a c\textunderscore fun record that holds the definition of the
+respective function.
+
+\subsubsection{Expressions}
+
+\includecode[erlang]{lst:core_erlang_c_values}{The c\textunderscore values record definition}{%
+  listings/core_erlang_records/c_values.erl
+}
+
+\emph{Ordered sequence of single expressions} (Listing~\ref{lst:core_erlang_c_values}).
+With the term single expression, we mean that we want an expression that its
+evaluation will yield to a value. An ordered sequence is the result of
+evaluating an expression and is by no means a value per se, meaning that we
+cannot have a sequence of sequences. The length of the es list denotes the
+degree of the sequence.
+
+\includecode[erlang]{lst:core_erlang_c_literal}{The c\textunderscore literal record definition}{%
+  listings/core_erlang_records/c_literal.erl
+}
+
+
+\emph{Atomic literal} (Listing~\ref{lst:core_erlang_c_literal}).
+The c\textunderscore literal record holds a  literal and represents the Erlang value denoted
+by that literal.
+
+
