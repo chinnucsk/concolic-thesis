@@ -152,18 +152,19 @@ name, the list of exported functions, some optional attributes, such as type
 definitions and function specifications, and the definitions of the exported
 and internal functions. 
 
-As we see, these correspond with the fields of the c\textunderscore module record. The name
+As we see, these correspond with the fields of the c\textunderscore module record. The \texttt{name}
 field is always a c\textunderscore literal record that holds the name of the module. The
-exports field is a list of c\textunderscore var records that hold the names and arities of the
-exported functions. The attrs field is a list of the aforementioned c\textunderscore def
+\texttt{exports} field is a list of c\textunderscore var records that hold the names and arities of the
+exported functions. The \texttt{attrs} field is a list of the aforementioned c\textunderscore def
 constructs. In this case, each c\textunderscore def consists of two c\textunderscore literal records. The
 first one denotes the type of attribute (spec, type etc.) and the second one
 its definition. The interpretation of module attributes is implementation
-specific and we will discuss it in detail in the chapter <ENTER CHAPTER>. The
-defs field is also a list of c\textunderscore def constructs. The first element of each c\textunderscore def
-is a c\textunderscore var record that represents the name and arity of the defined function.
-The second element is a c\textunderscore fun record that holds the definition of the
-respective function.
+specific and we will discuss some of its uses in detail in the chapter <ENTER CHAPTER>. The
+\texttt{defs} field is also a list of c\textunderscore def constructs. The
+first element of each c\textunderscore def is a c\textunderscore var record
+that represents the name and arity of the defined function. The second element
+is a c\textunderscore fun record that holds the definition of the respective
+function.
 
 \subsubsection{Expressions}
 
@@ -175,7 +176,7 @@ respective function.
 With the term single expression, we mean that we want an expression that its
 evaluation will yield to a value. An ordered sequence is the result of
 evaluating an expression and is by no means a value per se, meaning that we
-cannot have a sequence of sequences. The length of the es list denotes the
+cannot have a sequence of sequences. The length of the \texttt{es} list denotes the
 degree of the sequence.
 
 \includecode[erlang]{lst:core_erlang_c_literal}{The c\textunderscore literal record definition}{%
@@ -192,7 +193,293 @@ by that literal.
 }
 
 \emph{Variable name} (Listing~\ref{lst:core_erlang_c_var}).
-The name field can be an integer() or an atom() (variable’s name) or a \{atom(),
+The \texttt{name} field can be an integer() or an atom() (variable’s name) or a \{atom(),
 integer()\} (function’s name and arity). It evaluates to the value that is bound
 to the variable or function in the current environment. We should mention that
 when it comes to a function, the value that we expect is a closure.
+
+
+\includecode[erlang]{lst:core_erlang_c_tuple}{The c\textunderscore tuple record definition}{%
+  listings/core_erlang_records/c_tuple.erl
+}
+
+\emph{Erlang tuple} (Listing~\ref{lst:core_erlang_c_tuple}).
+The c\textunderscore tuple record holds a list of n expressions. This evaluates to the Erlang
+n-tuple where each element is the result of the evaluation of the respective
+expression of the \texttt{es} list in the current environment. If the \texttt{es} field is an
+empty list, then the result is the 0-tuple \{\}.
+
+
+\includecode[erlang]{lst:core_erlang_c_cons}{The c\textunderscore cons record definition}{%
+  listings/core_erlang_records/c_cons.erl
+}
+
+\emph{Erlang list constructor} (Listing~\ref{lst:core_erlang_c_cons}).
+The \texttt{hd} field is the expression that evaluates to the head of the cons cell and
+the \texttt{tl} field is the expression that evaluates to the tail of the cons cell. The
+environment in which these evaluations occur is the current environment of the
+c\textunderscore cons.
+
+
+\includecode[erlang]{lst:core_erlang_c_binary}{The c\textunderscore binary record definition}{%
+  listings/core_erlang_records/c_binary.erl
+}
+
+\emph{Erlang binary} (Listing~\ref{lst:core_erlang_c_binary}).
+The \texttt{segments} field is a list of c\textunderscore bitstr records that each evaluates to an Erlang
+bitstring. The value of the c\textunderscore binary is the concatenation of these individual
+bitstrings in the order defined in the segments list. All the segments are
+evaluated in same environment as the c\textunderscore binary record.
+
+
+\includecode[erlang]{lst:core_erlang_c_bitstr}{The c\textunderscore bitstr record definition}{%
+  listings/core_erlang_records/c_bitstr.erl
+}
+
+\emph{Erlang bitstring} (Listing~\ref{lst:core_erlang_c_bitstr}).
+The \texttt{val} field specifies a value to be encoded as a bitstring, whereas the rest
+of the fields control the encoding and are the template of the bitstring. These
+control fields are evaluated at load time so they ought to be c\textunderscore literal
+records. This limitation has complicated the implementation of the Core Erlang
+interpreter and its effect will be discussed at the chapter <ENTER CHAPTER>.
+The \texttt{size} field is evaluated either to a non negative integer or to the atom
+\texttt{‘all’}. The \texttt{unit} field evaluates to number between 1 and 256. The \texttt{type} field
+evaluates to either integer, float or binary. The \texttt{flags} field evaluates to a
+list that contains a value for the signedness (signed or unsigned) and a value
+for the endianess (big, little or native) of the bitstring. The specifics of
+the encoding will be discussed when we present the Erlang Type System in
+chapter <ENTER CHAPTER>.
+
+\includecode[erlang]{lst:core_erlang_c_let}{The c\textunderscore let record definition}{%
+  listings/core_erlang_records/c_let.erl
+}
+
+\emph{Let definition} (Listing~\ref{lst:core_erlang_c_let}).
+First of all, we evaluate the expression that is held in the \texttt{arg} field in the
+current environment \texttt{e}. This evaluation yields sequence of \texttt{n} values \texttt{s}. We then
+expect a list of n c\textunderscore var records in the \texttt{vars} field that represent the variables
+that are to be bound. We then bind these variables to their respective value in
+the sequence /texttt{s} and add them to the current environment \texttt{e} thus creating the new
+environment \texttt{e’}. The value of the whole let expression is the evaluation of the
+expression of the \texttt{body} field in the new environment \texttt{e’}.
+
+
+\includecode[erlang]{lst:core_erlang_c_seq}{The c\textunderscore seq record definition}{%
+  listings/core_erlang_records/c_seq.erl
+}
+
+\emph{Sequence of expressions} (Listing~\ref{lst:core_erlang_c_seq}).
+This record is syntactic sugar for a c\textunderscore let without an
+\texttt{vars} field. Its only purpose is to evaluate the expression of the
+\text{arg} field before the expression of the \texttt{body} field. Both
+expressions are evaluated in the current environment.
+
+\includecode[erlang]{lst:core_erlang_c_case}{The c\textunderscore case record definition}{%
+  listings/core_erlang_records/c_case.erl
+}
+
+\emph{Case statement} (Listing~\ref{lst:core_erlang_c_case}).
+This is the main control flow construct (along with c\textunderscore receive). We begin with
+evaluating the expression of the \texttt{arg} field in the current environment which
+yields a sequence of values. Then, this sequence is matched against each of the
+clauses in the \texttt{clauses} field list until one of them succeeds. It is certain
+that at least one will succeed since the compiler adds a catch-all clause at
+the end of every non-exhaustive case statement that will raise the appropriate
+exception. The order of the clauses is important since only the first one that
+matched will be selected. For what happens when a clause is selected, refer to
+the explanation of the c\textunderscore clause record.
+
+
+\includecode[erlang]{lst:core_erlang_c_fun}{The c\textunderscore fun record definition}{%
+  listings/core_erlang_records/c_fun.erl
+}
+
+\emph{Function definition} (Listing~\ref{lst:core_erlang_c_fun}).
+The \texttt{vars} field containts a list of c\textunderscore var records that denote the parameters of
+the function. The \texttt{body} field contains an expression that defines the body of
+the function. This record is used to define three types of functions.
+
+\begin{itemize}
+  \item An exported or internal function of a model
+  \item An anonymous function
+  \item A function that is bound in a letrec statement
+\end{itemize}
+
+In all three cases, it evaluates to the closure that is defined by abstracting
+the expression in the \texttt{body} field with respect to the parameters in the \texttt{vars}
+field in the current environment.
+
+
+\includecode[erlang]{lst:core_erlang_c_letrec}{The c\textunderscore letrec record definition}{%
+  listings/core_erlang_records/c_letrec.erl
+}
+
+\emph{Letrec statement} (Listing~\ref{lst:core_erlang_c_letrec}).
+We must note that only functions can be bound by a Core Erlang letrec
+statement. Therefore, the c\textunderscore def we encounter in \texttt{defs} field list has a c\textunderscore var as
+its first element that denotes the name and arity of the function that is to be
+bound. The second element is a c\textunderscore fun record that holds the definition of the
+particular function. Once we bind all the functions to their definitions and
+add them to the current environment \texttt{e}, we evaluate the expression of the \texttt{body}
+field in the resulting environment \texttt{e’}.
+
+The definition of \texttt{e’} can be a little tricky. The environment \texttt{e’} is the smallest
+environment such that:
+
+\begin{itemize}
+  \item contains all the elements of \texttt{e}, except for the functions that will be
+    bound by the letrec,
+  \item and every such function will be evaluated in \texttt{e’} itself.
+\end{itemize}
+
+This is a circular definition and its implementation requires a recursive
+environment. Essentially, we need an environment that arranges to evaluate the
+values for its bindings in an environment where the bindings are already in
+place. We will discuss how we implemented this feature in the chapter <ENTER
+CHAPTER>.
+
+\includecode[erlang]{lst:core_erlang_c_apply}{The c\textunderscore apply record definition}{%
+  listings/core_erlang_records/c_apply.erl
+}
+
+\emph{Function application} (Listing~\ref{lst:core_erlang_c_apply}).
+The \texttt{op} field contains the expression that will evaluate to a closure \texttt{f} in the
+current environment. The \texttt{args} field contains a list of n expressions that will
+evaluate to \texttt{n} values respectively that will comprise the argument list of the
+closure. The result of the expression is the application of the argument list
+to the closure \texttt{f}. It is expected that the arity of the closure \texttt{f} will be the
+same as the length of the argument list.
+
+
+\includecode[erlang]{lst:core_erlang_c_call}{The c\textunderscore call record definition}{%
+  listings/core_erlang_records/c_call.erl
+}
+
+\emph{Inter-module function call} (Listing~\ref{lst:core_erlang_c_call}).
+The \texttt{module} and \texttt{name} fields contain the information of the function with an
+explicit module, function name, and arity (MFA) that will be called. The both
+evaluate to atoms. The \texttt{args} field contains a list of expressions that each is
+evaluated in the current environment. The resulting list of values will be
+passed as the argument list of the MFA. It is essential that the MFA is in its
+module’s exported list.
+
+
+\includecode[erlang]{lst:core_erlang_c_primop}{The c\textunderscore primop record definition}{%
+  listings/core_erlang_records/c_primop.erl
+}
+
+\emph{Primitive Operation} (Listing~\ref{lst:core_erlang_c_primop}).
+The \texttt{args} field contains a list of expressions that are evaluated in the current
+environment and yield a list of values respectively. The \texttt{name} field contains
+the primitive operation (mainly a c\textunderscore var) to be performed. We then apply the
+list of values to the primitive operator to get the value of the whole
+expression.
+
+The evaluation of a primitive operation is implementation dependent and may
+depend on many things, like the internal state of the process, the external
+state of the world etc. A common area that primitive operations are used in is
+bit comprehensions.
+
+\includecode[erlang]{lst:core_erlang_c_try}{The c\textunderscore try record definition}{%
+  listings/core_erlang_records/c_try.erl
+}
+
+\emph{Try–catch statement} (Listing~\ref{lst:core_erlang_c_try}).
+The \texttt{arg} field contains the main expression that we will try to evaluate
+in the current environment \texttt{e}. Depending on the result of this
+evaluation we have two alternatives:
+
+\begin{enumerate}
+  \item The evaluation completes normally and yields a sequence of values.
+    Then, we bind these values to the list of variables contained in the
+    \texttt{vars} field and add these bindings to \texttt{e} thus creating the
+    environment \texttt{e'}. The result of the try-catch expression is the result of the evaluation of the expression of the \texttt{body} field in the environment \texttt{e'}.
+  \item The evaluation stops abruptly raising an exception. Then, we bind the
+    exception to the list of variables contained in the \texttt{evars} field
+    and add these bindings to \texttt{e} thus creating the environment
+    \texttt{e''}. The result of the try-catch expression is the result of the evaluation of the expression of the \texttt{handler} field in the environment \texttt{e''}.
+\end{enumerate}
+
+
+\includecode[erlang]{lst:core_erlang_c_catch}{The c\textunderscore catch record definition}{%
+  listings/core_erlang_records/c_catch.erl
+}
+
+\emph{Catch statement} (Listing~\ref{lst:core_erlang_c_catch}).
+This is syntactic sugar for a c\textunderscore try with only the \texttt{body} field. This works as follows:
+We evaluate the \texttt{body} expression in the current environment and monitor its evaluation. There are two alternatives:
+
+\begin{enumerate}
+  \item If the evaluation completed normally, the value of the whole expression is the value of the \texttt{body}.
+  \item If the evaluation stops abruptly and yields an exception, we do one of the following:
+    \begin{enumerate}
+      \item If it is a \texttt{throw} exception, we return the reason of the
+        exception \texttt{r}.
+      \item If it is an \texttt{exit} exception, we return the reason of the
+        exception \texttt{r} wrapped in the tuple \texttt{\{'EXIT', r\}}.
+      \item If it is an \texttt{error} exception, we return the reason of the
+        exception \texttt{r} along with the stacktrace \texttt{s} wrapped in
+        the tuple \texttt{\{'EXIT', r, s\}}.
+    \end{enumerate}
+\end{enumerate}
+
+\includecode[erlang]{lst:core_erlang_c_receive}{The c\textunderscore receive record definition}{%
+  listings/core_erlang_records/c_receive.erl
+}
+
+\emph{Receive expression} (Listing~\ref{lst:core_erlang_c_receive}).
+This is the second type of control flow construct that exists in Core Erlang.
+Its evaluation is a bit complex thus is divided into stages.
+
+\begin{enumerate}
+  \item The \texttt{timeout} field contains the expiry expression, which the
+    first thing we evaluate in the current environment \texttt{e}. It may yield a non
+    negative integer \texttt{t} or the atom \texttt{'infinity'}. If the result
+    is not \texttt{'infinity'}, we start a timer that expires in \texttt{t}
+    milliseconds.
+  \item\label{itm:recv-stage-2} Then, we run through the process's mailbox from start to end and we try
+    to match a message agains one of the clauses in the \texttt{clauses} list
+    field in the current environment \texttt{e}. This may have two outcomes:
+    \begin{enumerate}
+      \item A message matches one of the clauses and yields some mappings that
+        added to \texttt{e} create the environment \texttt{e'}. Then, this
+        message is atomically deleted from the mailbox and we evaluate the
+        expression indicated by the matched clause in the environment \texttt{e'}.
+      \item We tried all the current messages but none matched any of the
+        clauses. If the expiry expression evaluated to 0 or the timer has
+        expired, we evaluate the expression of the \texttt{action} field in
+        \texttt{e}. Otherwise, we suspend the evaluation and continue to the
+        next stage.
+    \end{enumerate}
+  \item The evaluation is recovered if a message has arrived to the mailbox or
+    if the timer has expired. In the former scenario we re-enter stage~\ref{itm:recv-stage-2},
+    whereas in the latter one we evaluate the expression of the \texttt{action}
+    field in \texttt{e}.
+\end{enumerate}
+
+\subsubsection{Clauses and Pattern Matching}
+
+\includecode[erlang]{lst:core_erlang_c_clause}{The c\textunderscore clause record definition}{%
+  listings/core_erlang_records/c_clause.erl
+}
+
+\emph{Clause template} (Listing~\ref{lst:core_erlang_c_clause}).
+This records describes the template of a Core Erlang clause. The \texttt{pats}
+field contains the list of patterns that will be tried, in left-to-right order,
+against the sequence of values so as to determine if the clause matches the
+sequence. The patterns are evaluated in the current environment \texttt{e}.
+
+\begin{itemize}
+  \item If the patterns and the sequence matched, some new bindings may have
+    been generated which added to \texttt{e} will create the new environment
+    \texttt{e'}. We then evalute the expression of the \texttt{guard} field. 
+    \begin{itemize}
+      \item If the result is \texttt{'true'}, the clause has been definitively
+        matched thus we continue to evaluate the expression of the
+        \texttt{body} field in the environment \texttt{e'}.
+      \item If the result is \texttt{'false'}, the clause does not match so we
+        move on to the next clause.
+    \end{itemize}
+\end{itemize}
+
+
