@@ -65,7 +65,6 @@ wanted to work with Core Erlang rather than BEAM bytecode. The next step is to
 run some optimization passes on the bytecode and then convert it to threaded
 code and load it to the virtual machine and prepare it for execution.
 
-
 \section{Core Erlang}\label{sec:core_erlang}
 
 As we mentioned before, Core Erlang is an intermediate representation of
@@ -100,8 +99,8 @@ semantics.
 
 The Core Erlang Abstract Syntax Tree has a dual representation in the Erlang
 compiler. The core parts of the compiler use the records defined in the file
-lib/compiler/core\textunderscore parse.hrl, whereas cerl\textunderscore inline and all the modules in
-lib/hipe/cerl use the Abstract Data Type defined in lib/compiler/cerl.erl.
+\texttt{lib/compiler/core\textunderscore parse.hrl}, whereas \texttt{cerl\textunderscore inline} and all the modules in
+\texttt{lib/hipe/cerl} use the Abstract Data Type defined in \texttt{lib/compiler/cerl.erl}.
 Essentially, both definitions are the same and can be used interchangeably so
 the decision on which representation to use boils down to the personal
 preference and style of the programmer. The records’ representation allows for
@@ -113,7 +112,7 @@ matching greatly facilitates our implementation of the Core Erlang interpreter.
 We feel that since the lexical analysis and grammar of Core Erlang are
 presented in detail in the Core Erlang language specification paper, we should
 rather present the undocumented definitions of the Core Erlang Abstract Syntax
-Tree in lib/compiler/core\textunderscore parse.hrl and discuss their semantics in the context
+Tree in \texttt{lib/compiler/core\textunderscore parse.hrl} and discuss their semantics in the context
 of their current usage in the Erlang compiler. First of all, let’s note some
 principles that will apply for the rest of the subsection and continue to
 present the AST records.
@@ -155,9 +154,10 @@ and internal functions.
 As we see, these correspond with the fields of the \texttt{c\textunderscore module} record. The \texttt{name}
 field is always a \texttt{c\textunderscore literal} record that holds the name of the module. The
 \texttt{exports} field is a list of \texttt{c\textunderscore var} records that hold the names and arities of the
-exported functions. The \texttt{attrs} field is a list of the aforementioned \texttt{c\textunderscore def}
-constructs. In this case, each \texttt{c\textunderscore def} consists of two \texttt{c\textunderscore literal} records. The
-first one denotes the type of attribute (spec, type etc.) and the second one
+exported functions. The \texttt{attrs} field is a list of the aforementioned
+\texttt{c\textunderscore def} constructs. In this case, each \texttt{c\textunderscore def} consists of two
+\texttt{c\textunderscore literal} records. The first one denotes the type of
+attribute (spec, type etc.) and the second one
 its definition. The interpretation of module attributes is implementation
 specific and we will discuss some of its uses in detail in the chapter <ENTER CHAPTER>. The
 \texttt{defs} field is also a list of \texttt{c\textunderscore def} constructs. The
@@ -504,5 +504,62 @@ A pattern is represented by the following records:
 \includecode[erlang]{lst:core_erlang_c_alias}{The \texttt{c\textunderscore alias} record definition}{%
   listings/core_erlang_records/c_alias.erl
 }
+
+\section{Erlang Types and Function Specifications}\label{sec:erlang_types_specs}
+
+Erlang is a dynamically typed language. Type information exists in any piece of
+data and is checked during every operation at runtime so as to provide type
+safety. There are primitive types built in the language that can be combined by
+the programmer to create custom ones. There is even a notation for declaring
+the type specification of a function concerning its intended use. This piece of
+information is critical for an effective testing tool since it will report bugs
+relevant to the program's actual use. We will briefly describe the types in
+Erlang and the function specifications and focus on its representation in the
+Core Erlang Abstract Syntax Tree. A detailed presentation of the Erlang Type
+System can be found at <Manolis Ptyxiaki>.
+
+Any piece of data in Erlang is called a term. A term can belong to a predefined
+(or built-in) type or to a user-defined type constructed from the predefined
+ones. 
+
+\subsection{Predefined Types}\label{sub:predef_types}
+
+The predefined types are the following:
+
+\begin{itemize}
+  \item \emph{Number}. Numbers are numeric literals. A number can be either
+    an \textbf{integer} or a \textbf{float}.
+  \item \emph{Atom}. An atom is a literal, a named constant.
+  \item \emph{Bit String and Binary}. A bit string is a series of bytes stored
+    in an area of untyped memory. If the number of bits is divisible by eight,
+    it is also a binary.
+  \item \emph{Reference}. A reference is a term which is unique in an Erlang
+    runtime system.
+  \item \emph{Fun}. A fun is callable function object represented with a
+    closure.
+  \item \emph{Port Identifier}. A port identifier identifies an Erlang port.
+  \item \emph{Pid}. A pid, or process identifier, is handle that uniquely
+    identifies an Erlang process.
+  \item \emph{Tuple}. A tuple is a compound data type with a fixed number of
+    terms (not necessarily of the same type).
+  \item \emph{List}. A list is a compound data type with a variable number of
+    terms (not necessarily of the same type).
+\end{itemize}
+
+There are also some types that are defined in terms of the above primitives and
+are essentially syntactic sugar:
+
+\begin{itemize}
+  \item \emph{Char}. A char is an integer in the range from 0 to 1114111.
+  \item \emph{String}. A string is shorthand for a list of chars.
+  \item \emph{Record}. A record is actually a tuple with an atom as its first
+    element. Records are declared with \texttt{-record} compiler attribute and
+    are converted to tuples at compile time.
+  \item \emph{Boolean}. There is no boolean type in Erlang. However, the atoms
+    \texttt{'true'} and \texttt{'false'} have a special use for acting as
+    boolean values.
+\end{itemize}
+
+\subsection{User Defined Types}\label{sub:userdef_types}
 
 
