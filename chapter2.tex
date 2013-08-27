@@ -142,11 +142,11 @@ present the AST records.
 
 \subsubsection{Root node of a syntax tree}
 
-\includecode[erlang]{lst:core_erlang_c_module}{The c\textunderscore module record definition}{%
+\includecode[erlang]{lst:core_erlang_c_module}{The \texttt{c\textunderscore module} record definition}{%
   listings/core_erlang_records/c_module.erl
 }
 
-The root of a syntax tree will always be a c\textunderscore module record (Listing~\ref{lst:core_erlang_c_module}). The basic unit that
+The root of a syntax tree will always be a \texttt{c\textunderscore module} record (Listing~\ref{lst:core_erlang_c_module}). The basic unit that
 is compiled is a module, a single source code file that consists of the module
 name, the list of exported functions, some optional attributes, such as type
 definitions and function specifications, and the definitions of the exported
@@ -465,14 +465,15 @@ Its evaluation is a bit complex thus is divided into stages.
 
 \emph{Clause template} (Listing~\ref{lst:core_erlang_c_clause}).
 This records describes the template of a Core Erlang clause. The \texttt{pats}
-field contains the list of patterns that will be tried, in left-to-right order,
+field contains the sequence of patterns that will be tried, in left-to-right order,
 against the sequence of values so as to determine if the clause matches the
 sequence. The patterns are evaluated in the current environment \texttt{e}.
 
 \begin{itemize}
-  \item If the patterns and the sequence matched, some new bindings may have
-    been generated which added to \texttt{e} will create the new environment
-    \texttt{e'}. We then evalute the expression of the \texttt{guard} field. 
+  \item If the patterns and the sequence of values matched, some new bindings
+    may have been generated which added to \texttt{e} will create the new
+    environment \texttt{e'}. We then evalute the expression of the
+    \texttt{guard} field. 
     \begin{itemize}
       \item If the result is \texttt{'true'}, the clause has been definitively
         matched thus we continue to evaluate the expression of the
@@ -480,6 +481,28 @@ sequence. The patterns are evaluated in the current environment \texttt{e}.
       \item If the result is \texttt{'false'}, the clause does not match so we
         move on to the next clause.
     \end{itemize}
+  \item If the patterns did not match the sequence, the next clause in order is
+    tried.
 \end{itemize}
+
+A pattern is represented by the following records:
+
+\begin{itemize}
+  \item A \texttt{c\textunderscore literal} record represents an atomic literal pattern.
+  \item A \texttt{c\textunderscore var} record represents a variable name pattern.
+  \item A \texttt{c\textunderscore tuple} record represents a tuple pattern.
+  \item A \texttt{c\textunderscore cons} record represents a list constructor pattern.
+  \item A \texttt{c\textunderscore binary} record represents a binary pattern.
+  \item A \texttt{c\textunderscore alias} record (Listing~\ref{lst:core_erlang_c_alias}) represents an alias pattern.
+    The \texttt{pat} field contains the pattern that will be matched against a
+    value \texttt{v}. If the match succeeds then a mapping is generated that
+    binds the variable of the \texttt{var} field to \texttt{v}. If not, the
+    whole match fails.
+\end{itemize}
+
+
+\includecode[erlang]{lst:core_erlang_c_alias}{The c\textunderscore alias record definition}{%
+  listings/core_erlang_records/c_alias.erl
+}
 
 
