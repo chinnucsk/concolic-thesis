@@ -562,4 +562,101 @@ are essentially syntactic sugar:
 
 \subsection{User Defined Types}\label{sub:userdef_types}
 
+Erlang allows the programmer to define his own types using the \texttt{-type}
+and \texttt{-opaque} compiler attributes. User defined types are often useful
+for parametric or recursive types and may serve as type aliases.
 
+The basic syntax of a type is an atom, i.e. the type's name, followed by closed
+parentheses. Type declarations can also be parameterized by including type
+variables between the parentheses, used for parametric types. The definition is
+a valid type expression (Subsection~\ref{sub:type_notation}). Let's note that
+users are not allowed to define types with the same names and arity as the
+predefined or built-in ones.
+
+\subsection{Type Notation}\label{sub:type_notation}
+
+Types expressions are used in type definitions and function specifications. In
+this subsection we will describe the notation for writing type expressions and
+we will see how the compiler transforms then into the Core Erlang AST.
+
+We should note that the Erlang compiler stores debug information containing the
+source code's line numbers in the AST. Thus, you will see the symbol
+\texttt{Ln} used in the Core Erlang AST representation of the type notation,
+which denotes the line number it refers to in the source code file.
+
+\subsubsection{Notation of Predefined Types}\label{subsub:notation_predef_types}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+    \hline
+    Type Notation & Description & Core Erlang Representation \\
+    \hline
+      \emph{term()} & \multirow{2}*{Any Erlang term} & \texttt{\{type, Ln, term, []\}} \\
+    \cline{1-1} \cline{3-3}
+      \emph{any()} & & \texttt{\{type, Ln, any, []\}} \\
+    \hline
+      \emph{number()} & Any Erlang integer or float & \texttt{\{type, Ln, number, []\}} \\
+    \hline
+      \emph{integer()} & Erlang integer & \texttt{\{type, Ln, integer, []\}} \\
+    \hline
+      \emph{<Int>} & 
+      Singleton integer type (only the specific \emph{<Int>}) & 
+      \texttt{\{integer, Ln, <Int>\}} \\
+    \hline
+      \emph{<Lo>...<Hi>} & 
+      Integers in the range from \emph{<Lo>} to \emph{<Hi>} & 
+      \texttt{\{type, Ln, range, [Lo, Hi]\}} where \texttt{Low :: \{integer, Ln, <Lo>\}}, \texttt{High :: \{integer, Ln, <Hi>\}} \\ 
+    \hline
+      \emph{neg\textunderscore integer()} & 
+      Any negative Erlang integer & 
+      \texttt{\{type, Ln, neg\textunderscore integer, []\}} \\
+    \hline
+      \emph{non\textunderscore neg\textunderscore integer()} & 
+      Any non-negative Erlang integer & 
+      \texttt{\{type, Ln, non\textunderscore neg\textunderscore integer, []\}} \\
+    \hline
+      \emph{pos\textunderscore integer()} & 
+      Any positive Erlang integer & 
+      \texttt{\{type, Ln, pos\textunderscore integer, []\}} \\
+    \hline
+      \emph{float()} & Any Erlang float number & \texttt{\{type, Ln, float, []\}} \\
+    \hline
+      \emph{atom()} & Any Erlang atom & \texttt{\{type, Ln, atom, []\}} \\
+    \hline
+      \emph{<Atom>} & 
+      Singleton atom type (only the specific \emph{<Atom>}) & 
+      \texttt{\{atom, Ln, <Atom>\}} \\
+    \hline
+      \emph{reference()} & Any Erlang reference & \texttt{\{type, Ln, reference, []\}} \\
+    \hline
+      \emph{port()} & Any Erlang port identifier & \texttt{\{type, Ln, port, []\}} \\
+    \hline
+      \emph{pid()} & Any Erlang process identifier & \texttt{\{type, Ln, pid, []\}} \\
+    \hline
+      \emph{tuple()} & Any Erlang tuple & \texttt{\{type, Ln, tuple, [any]\}} \\
+    \hline
+      \{\emph{Type\textsubscript{1},...,Type\textsubscript{N}}\}
+      & An tuple of N elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}} respectively
+      & \texttt{\{type, Ln, tuple, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+    \hline
+      \emph{list()} & Any Erlang list & \texttt{\{type, Ln, list, []\}} \\
+    \hline
+      \emph{nonempty\textunderscore list()} & 
+      Any Erlang non-empty list & 
+      \texttt{\{type, Ln, nonempty\textunderscore list, []\}} \\
+    \hline
+      [] & Singleton list type (only the empty list) & \texttt{\{type, Ln, nil, []\}} \\
+    \hline
+      [\emph{Type\textsubscript{1}}|\emph{...}|\emph{Type\textsubscript{N}}]
+      & An list of elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}}
+      & \texttt{\{type, Ln, list, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+    \hline
+      [\emph{Type\textsubscript{1}}|\emph{...}|\emph{Type\textsubscript{N}}, \emph{...}]
+      & An non-empty list of elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}}
+      & \texttt{\{type, Ln, nonempty\textunderscore list, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+    \hline
+  \end{tabularx}
+  \caption{Notation of Erlang predefined types}
+  \label{tab:notation_predef_types}
+\end{table}
