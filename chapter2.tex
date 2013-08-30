@@ -590,43 +590,136 @@ which denotes the line number it refers to in the source code file.
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
-    Type Notation & Description & Core Erlang Representation \\
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
+      \emph{number()} & Any Erlang integer or float & \texttt{\{type, Ln, number, []\}} \\
     \hline
+      \emph{integer()} & Any Erlang integer & \texttt{\{type, Ln, integer, []\}} \\
+    \hline
+      \emph{<Int>}
+      & Singleton integer type (only the specific \emph{<Int>})
+      & \texttt{\{integer, Ln, <Int>\}} \\
+    \hline
+      \emph{<Lo>...<Hi>}
+      & Integers in the range from \emph{<Lo>} to \emph{<Hi>}
+      & \texttt{\{type, Ln, range, [Lo, Hi]\}} where \texttt{Low :: \{integer, Ln, <Lo>\}}, \texttt{High :: \{integer, Ln, <Hi>\}} \\ 
+    \hline
+      \emph{neg\textunderscore integer()}
+      & Any negative Erlang integer
+      & \texttt{\{type, Ln, neg\textunderscore integer, []\}} \\
+    \hline
+      \emph{non\textunderscore neg\textunderscore integer()}
+      & Any non-negative Erlang integer
+      & \texttt{\{type, Ln, non\textunderscore neg\textunderscore integer, []\}} \\
+    \hline
+      \emph{pos\textunderscore integer()}
+      & Any positive Erlang integer
+      & \texttt{\{type, Ln, pos\textunderscore integer, []\}} \\
+    \hline
+      \emph{float()} & Any Erlang float & \texttt{\{type, Ln, float, []\}} \\
+    \hline
+  \end{tabularx}
+  \caption{Notation of numeric types}
+  \label{tab:notation_numeric_types}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+    \hline
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
+      \emph{tuple()} & Any Erlang tuple & \texttt{\{type, Ln, tuple, any\}} \\
+    \hline
+      \{\}
+      & Singleton tuple type (only the 0-tuple)
+      & \texttt{\{type, Ln, tuple, []\}} \\
+    \hline
+      \{\emph{Type\textsubscript{1},...,Type\textsubscript{N}}\}
+      & An tuple of N elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}} respectively
+      & \texttt{\{type, Ln, tuple, [T\textsubscript{1},...,T\textsubscript{N}]\}} where \texttt{T\textsubscript{i}} is a valid type expression \\
+    \hline
+  \end{tabularx}
+  \caption{Notation of tuples}
+  \label{tab:notation_tuples}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+    \hline
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
+      \emph{list()} & Any Erlang list & \texttt{\{type, Ln, list, []\}} \\
+    \hline
+      \emph{nonempty\textunderscore list()} 
+      & Any Erlang non-empty list 
+      & \texttt{\{type, Ln, nonempty\textunderscore list, []\}} \\
+    \hline
+      [] & Singleton list type (only the empty list) & \texttt{\{type, Ln, nil, []\}} \\
+    \hline
+      [\emph{Type\textsubscript{1}}|\emph{...}|\emph{Type\textsubscript{N}}]
+      & An list of elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}}
+      & \texttt{\{type, Ln, list, [T\textsubscript{1},...,T\textsubscript{N}]\}} where \texttt{T\textsubscript{i}} is a valid type expression \\
+    \hline
+      [\emph{Type\textsubscript{1}}|\emph{...}|\emph{Type\textsubscript{N}}, \emph{...}]
+      & An non-empty list of elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}}
+      & \texttt{\{type, Ln, nonempty\textunderscore list, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+    \hline
+  \end{tabularx}
+  \caption{Notation of lists}
+  \label{tab:notation_lists}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+    \hline
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
+    \hline
+  \end{tabularx}
+  \caption{Notation of binaries and bit strings}
+  \label{tab:notation_binary_types}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+    \hline
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
+    \hline
+  \end{tabularx}
+  \caption{Notation of function types}
+  \label{tab:notation_funs}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
+    \hline
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
       \emph{term()} & \multirow{2}*{Any Erlang term} & \texttt{\{type, Ln, term, []\}} \\
     \cline{1-1} \cline{3-3}
       \emph{any()} & & \texttt{\{type, Ln, any, []\}} \\
     \hline
-      \emph{number()} & Any Erlang integer or float & \texttt{\{type, Ln, number, []\}} \\
+      \emph{none()} & No type & \texttt{\{type, Ln, none, []\}} \\
     \hline
-      \emph{integer()} & Erlang integer & \texttt{\{type, Ln, integer, []\}} \\
+      \emph{no\textunderscore return()} 
+      & No return type (Used when an exception is raised) 
+      & \texttt{\{type, Ln, no\textunderscore return, []\}} \\
     \hline
-      \emph{<Int>} & 
-      Singleton integer type (only the specific \emph{<Int>}) & 
-      \texttt{\{integer, Ln, <Int>\}} \\
-    \hline
-      \emph{<Lo>...<Hi>} & 
-      Integers in the range from \emph{<Lo>} to \emph{<Hi>} & 
-      \texttt{\{type, Ln, range, [Lo, Hi]\}} where \texttt{Low :: \{integer, Ln, <Lo>\}}, \texttt{High :: \{integer, Ln, <Hi>\}} \\ 
-    \hline
-      \emph{neg\textunderscore integer()} & 
-      Any negative Erlang integer & 
-      \texttt{\{type, Ln, neg\textunderscore integer, []\}} \\
-    \hline
-      \emph{non\textunderscore neg\textunderscore integer()} & 
-      Any non-negative Erlang integer & 
-      \texttt{\{type, Ln, non\textunderscore neg\textunderscore integer, []\}} \\
-    \hline
-      \emph{pos\textunderscore integer()} & 
-      Any positive Erlang integer & 
-      \texttt{\{type, Ln, pos\textunderscore integer, []\}} \\
-    \hline
-      \emph{float()} & Any Erlang float number & \texttt{\{type, Ln, float, []\}} \\
+      \emph{Type\textsubscript{1}} | \emph{...} | \emph{Type\textsubscript{N}}
+      & An union of N terms of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}} respectively
+      & \texttt{\{type, Ln, union, [T\textsubscript{1},...,T\textsubscript{N}]\}} where \texttt{T\textsubscript{i}} is a valid type expression \\
     \hline
       \emph{atom()} & Any Erlang atom & \texttt{\{type, Ln, atom, []\}} \\
     \hline
-      \emph{<Atom>} & 
-      Singleton atom type (only the specific \emph{<Atom>}) & 
-      \texttt{\{atom, Ln, <Atom>\}} \\
+      \emph{<Atom>}
+      & Singleton atom type (only the specific \emph{<Atom>})
+      & \texttt{\{atom, Ln, <Atom>\}} \\
     \hline
       \emph{reference()} & Any Erlang reference & \texttt{\{type, Ln, reference, []\}} \\
     \hline
@@ -634,29 +727,45 @@ which denotes the line number it refers to in the source code file.
     \hline
       \emph{pid()} & Any Erlang process identifier & \texttt{\{type, Ln, pid, []\}} \\
     \hline
-      \emph{tuple()} & Any Erlang tuple & \texttt{\{type, Ln, tuple, [any]\}} \\
+  \end{tabularx}
+  \caption{Notation of other useful types}
+  \label{tab:notation_other}
+\end{table}
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
-      \{\emph{Type\textsubscript{1},...,Type\textsubscript{N}}\}
-      & An tuple of N elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}} respectively
-      & \texttt{\{type, Ln, tuple, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+      Type Notation & Description & Core Erlang Representation \\
+    \hline \hline
+      \emph{char()} & Any Erlang char & \texttt{\{type, Ln, char, []\}} \\
     \hline
-      \emph{list()} & Any Erlang list & \texttt{\{type, Ln, list, []\}} \\
+      \emph{string()} & Any Erlang string & \texttt{\{type, Ln, string, []\}} \\
     \hline
-      \emph{nonempty\textunderscore list()} & 
-      Any Erlang non-empty list & 
-      \texttt{\{type, Ln, nonempty\textunderscore list, []\}} \\
+      \emph{nonempty\textunderscore string()} 
+      & Any non-empty Erlang string 
+      & \texttt{\{type, Ln, nonempty\textunderscore string, []\}} \\
     \hline
-      [] & Singleton list type (only the empty list) & \texttt{\{type, Ln, nil, []\}} \\
+      \emph{boolean()} 
+      & One of the atoms \texttt{'true'} or \texttt{'false'}
+      & \texttt{\{type, Ln, boolean, []\}} \\
     \hline
-      [\emph{Type\textsubscript{1}}|\emph{...}|\emph{Type\textsubscript{N}}]
-      & An list of elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}}
-      & \texttt{\{type, Ln, list, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+      \emph{byte()} 
+      & Any integer in the range from 0 to 255
+      & \texttt{\{type, Ln, byte, []\}} \\
     \hline
-      [\emph{Type\textsubscript{1}}|\emph{...}|\emph{Type\textsubscript{N}}, \emph{...}]
-      & An non-empty list of elements of types \emph{Type\textsubscript{1},...,Type\textsubscript{N}}
-      & \texttt{\{type, Ln, nonempty\textunderscore list, [T\textsubscript{1},...,T\textsubscript{N}]\}}  where \texttt{T\textsubscript{i}} is a valid type expression \\
+      \emph{node()} & An atom that represents an Erlang VM node & \texttt{\{type, Ln, node, []\}} \\
+    \hline
+      \emph{module()} & An atom that represents a module & \texttt{\{type, Ln, module, []\}} \\
+    \hline
+     \emph{mfa()} 
+     & An tuple that represents an Erlang MFA (\{\emph{Module, Function, Arity}\})
+     & \texttt{\{type, Ln, mfa, []\}} \\
     \hline
   \end{tabularx}
-  \caption{Notation of Erlang predefined types}
-  \label{tab:notation_predef_types}
+  \caption{Notation of aliases for other types}
+  \label{tab:notation_aliases}
 \end{table}
+
+
+
