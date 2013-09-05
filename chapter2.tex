@@ -159,7 +159,7 @@ exported functions. The \texttt{attrs} field is a list of the aforementioned
 \texttt{c\textunderscore literal} records. The first one denotes the type of
 attribute (spec, type etc.) and the second one
 its definition. The interpretation of module attributes is implementation
-specific and we will discuss some of its uses in detail in the chapter <ENTER CHAPTER>. The
+specific and we will discuss some of its uses in detail in Section~\ref{sec:erlang_types_specs}. The
 \texttt{defs} field is also a list of \texttt{c\textunderscore def} constructs. The
 first element of each \texttt{c\textunderscore def} is a \texttt{c\textunderscore var} record
 that represents the name and arity of the defined function. The second element
@@ -577,7 +577,7 @@ predefined or built-in ones.
 
 Types expressions are used in type definitions and function specifications. In
 this subsection we will describe the notation for writing type expressions and
-we will see how the compiler transforms then into the Core Erlang AST.
+we will see how the compiler transforms them into the Core Erlang AST.
 
 We should note that the Erlang compiler stores debug information containing the
 source code's line numbers in the AST. Thus, you will see the symbol
@@ -586,7 +586,7 @@ which denotes the line number it refers to in the source code file.
 
 \subsubsection{Notation of Predefined Types}\label{subsub:notation_predef_types}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -623,7 +623,7 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_numeric_types}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -644,7 +644,7 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_tuples}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -671,7 +671,7 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_lists}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -683,7 +683,7 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_binary_types}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -695,7 +695,7 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_funs}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -732,7 +732,7 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_other}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[H]
   \centering
   \begin{tabularx}{\textwidth}{|c|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
     \hline
@@ -767,5 +767,71 @@ which denotes the line number it refers to in the source code file.
   \label{tab:notation_aliases}
 \end{table}
 
+\subsubsection{Notation of User Defined Types}\label{subsub:notation_userdef_types}
 
+We have mentioned that the root element of a Core Erlang AST is a
+\texttt{c\textunderscore module} record. The \texttt{attrs} field contains a
+list of \texttt{c\textunderscore def} records concerning implementation
+specific information. One type of such information is the declaration of a user
+defined type or a record. Let's call such a \texttt{c\textunderscore def}
+record, a \texttt{TypeAttrDef}. In Table~\ref{tab:notation_userdef_recs} we can
+the basic syntax of a \texttt{TypeAttrDef}.
 
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{|p{2cm}X|}
+    \hline
+      \texttt{TypeAttrDef} 
+        & \texttt{:: \{\{c\textunderscore literal, Ln, type\}, \{c\textunderscore literal, Ln, [TypeAttr]\}\}} \\
+      \texttt{TypeAttr} 
+        & \texttt{:: RecordDef | TypeDef} \\
+      \texttt{RecordDef}
+        & \texttt{:: \{\{record, RecordName :: atom()\}, (RecordField)+, []\}} \\
+      \texttt{RecordField}
+        & \texttt{:: UntypedRF | TypedRF} \\
+      \texttt{UntypedRF}
+        & \texttt{:: \{record\textunderscore field, Ln, FldName :: atom()\}} \\
+        & \texttt{ | \{record\textunderscore field, Ln, FldName :: atom(), DefVal :: term()\}} \\
+      \texttt{TypedRF} 
+        & \texttt{:: \{typed\textunderscore record\textunderscore field, UntypedRF, Type\}} \\
+      \texttt{TypeDef} 
+        & \texttt{:: \{TypeName :: atom(), Type, (FreeVar)*\}} \\
+      \texttt{FreeVar} 
+        & \texttt{:: \{var, Ln, VarName :: atom()\}} \\
+      \texttt{Type}
+        & \texttt{::} Valid Type Representation \\
+    \hline
+  \end{tabularx}
+  \caption{Basic Grammar of a \texttt{TypeAttrDef}}
+  \label{tab:notation_userdef_recs}
+\end{table}
+
+\subsection{Function Specifications}\label{sub:func_specs}
+
+\begin{table}[H]
+  \centering
+  \begin{tabularx}{\textwidth}{|p{2cm}X|}
+    \hline
+      \texttt{SpecAttrDef} 
+        & \texttt{:: \{\{c\textunderscore literal, Ln, spec\}, \{c\textunderscore literal, Ln, [SpecAttr]\}\}} \\
+      \texttt{SpecAttr} 
+        & \texttt{:: \{\{F :: atom(), A :: byte()\}, (Spec)+\}} \\
+      \texttt{Spec} 
+        & \texttt{:: Fun | BoundedFun} \\
+      \texttt{Fun} 
+        & \texttt{:: \{type, Ln, 'fun', [Product, Type]\}} \\
+      \texttt{Product} 
+        & \texttt{:: \{type, Ln, product, (Type)*\}} \\
+      \texttt{BoundedFun} 
+        & \texttt{:: \{type, Ln, bounded\textunderscore fun, [Fun, (Constraint)*]\}} \\
+      \texttt{Constraint} 
+        & \texttt{:: \{type, Ln, constraint, SubTypeCnst\}} \\
+      \texttt{SubTypeCnst} 
+        & \texttt{:: [\{atom, Ln, is\textunderscore subtype\}, [VarName :: atom(), Type]]} \\
+      \texttt{Type}
+        & \texttt{::} Valid Type Representation \\
+    \hline
+  \end{tabularx}
+  \caption{Basic Grammar of a \texttt{SpecAttrDef}}
+  \label{tab:notation_func_specs}
+\end{table}
