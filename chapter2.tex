@@ -774,7 +774,7 @@ We have mentioned that the root element of a Core Erlang AST is a
 list of \texttt{c\textunderscore def} records concerning implementation
 specific information. One type of such information is the declaration of a user
 defined type or a record. Let's call such a \texttt{c\textunderscore def}
-record, a \texttt{TypeAttrDef}. In Table~\ref{tab:notation_userdef_recs} we can
+record, a \texttt{TypeAttrDef}. In Table~\ref{tab:notation_userdef_recs} we can see
 the basic syntax of a \texttt{TypeAttrDef}.
 
 \begin{table}[H]
@@ -807,6 +807,23 @@ the basic syntax of a \texttt{TypeAttrDef}.
 \end{table}
 
 \subsection{Function Specifications}\label{sub:func_specs}
+
+A function specification is a contract which explicitly states the programmer's
+intented use for a function. It is declared using the \texttt{-spec} compiler
+attribute. The basic syntax is the following:
+
+\centerline{\texttt{-spec Fun(ArgType\textsubscript 1, ArgType\textsubscript 2, ..., ArgType\textsubscript N) $\rightarrow$ ReturnType}}
+
+There are also other ways of stating a function specification which are
+variants of the basic one. They may be used for documentation purposes, to
+express overloaded specifications etc. They are described in detail
+in the Erlang Type Specifications~\cite{erlang_typespec}.
+
+The information of a function's specification is stored in Core Erlang AST. You
+can find it as a \texttt{c\textunderscore def} in the \texttt{attrs} field of
+the root \texttt{c\textunderscore module} record, which we'll call
+\texttt{SpecAttrDef}. In Table~\ref{tab:notation_func_specs} we can see the
+basic syntax of a \texttt{SpecAttrDef}.
 
 \begin{table}[H]
   \centering

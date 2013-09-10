@@ -1,7 +1,11 @@
 \chapter{Concolic Testing}\label{ch:concolic_testing}
 
-\section{The Basic Idea\label{sec:conc_basic_idea}
+\section{The Basic Idea}\label{sec:conc_basic_idea}
 
-
-
-
+The word "concolic" is a portmanteau of the words concrete and symbolic and it
+depicts the hybrid nature of the concolic software testing technique. Concolic testing
+interleaves concrete execution with symbolic execution in order to achieve high
+path coverage. The basic idea is to use symbolic execution to generate inputs
+that will hopefully steer the program to alternate execution paths whilst
+concrete execution is used to guide the symbolic execution along a concrete
+path.
