@@ -9,3 +9,21 @@ path coverage. The basic idea is to use symbolic execution to generate inputs
 that will hopefully steer the program to alternate execution paths whilst
 concrete execution is used to guide the symbolic execution along a concrete
 path.
+
+During the execution, we keep a concrete and a symbolic state. The concrete
+state maps the variables to their concrete values whereas the symbolic state
+maps the variables that have non-concrete values to their symbolic
+representation. In order to start the process we need a seed concrete input,
+that is either provided by the user or is randomly generated. We then execute
+the program with this input and gather symbolic constraints at all the
+conditional statements along the execution. Each constraint is essentially a
+logical formula which is expressed as a function of the input symbolic
+variables and denotes the boolean value of the respective conditional statement
+during the execution. The conjuction of all the constraints is the path
+predicate. The next step is to feed the path predicate to a constraint solver
+in order to infer new variants of the input that will likely guide the program
+to a different feasible execution path. We, then, use the generated input as
+our new seed. This process is repeated systematically until every feasible
+execution path is explored.
+
+
