@@ -26,4 +26,62 @@ to a different feasible execution path. We, then, use the generated input as
 our new seed. This process is repeated systematically until every feasible
 execution path is explored.
 
+In the concurrent version, a new path may be explored by producing a different 
+interleaving of the program threads instead of generating a different input. 
+This instrumentation records and permutes the various events that lead to 
+data and lock races.
+
+\subsection{A Simple Example}\label{subsec:conc_simple_example}
+
+Consider the following simple Erlang function (Listing~\ref{lst:concolic_example}) 
+that has an erroneous branch:
+
+\includecode[erlang]{lst:concolic_example}{Simple Erlang function}{%
+  listings/concolic_example.erl
+}
+
+Any black-box testing technique would most likely require a lot of time, if ever, 
+to locate and reproduce the failure. 
+
+Let's see how concolic testing will help locate promptly the error. As we said, 
+we need a seed input to initialize our search. We arbitrary choose the input 
+\texttt{X = 0} and \texttt{Y = 0} and execute the code with these concrete 
+values. In line 2, we get \texttt{Z = 2 * Y = 0}. In line 3, the condition 
+evaluates to \texttt{false} as \texttt{X =/= 100000} and 
+\texttt{erlang:andalso/2} is short-circuited. Therefore, we follow the 
+"false" branch and the function returns \texttt{ok} and ends normally. At the 
+same time we execute the function symbolically following the same path as the 
+concrete execution. This yields the path constraint \texttt{(X =/= 100000)}.
+
+In order to force the program to follow a different a execution path in the next 
+iteration, we negate the only predicate in the patch constraint. This yields 
+the binding \texttt{X = 100000}, so we execute the function again with the 
+concrete values \texttt{X = 100000} and \texttt{Y = 0}. In line 2, we still get 
+\texttt{Z = 0}. In line 3, the expression \texttt{X =:= 100000} evaluates 
+to \texttt{true} but the expression \texttt{X < Z} evaluates to \texttt{false}, 
+thus making the whole condition evaluate to \texttt{false} again. The function 
+again returns \texttt{ok} and ends normally. After the symbolic execution we 
+get the path constraint \texttt{(X =:= 100000) $\land$ (X >= 2 * Y)}.
+
+This time we invoke the solver to negate the second predicate while keeping 
+the first predicate true. The solution may be possibly be \texttt{X = 100000} 
+and \texttt{Y = 50001}. By running the function with this concrete input, we 
+manage to reach the branch that raises the exception.
+
+As we see, this approach manages to locate the error in only three iterations.
+
+\subsection{Strengths and Limitations}\label{subsec:concolic_strength_limitation}
+
+\subsection{Challenges in Erlang}\label{subsec:concolic_chalenges_in_erlang}
+
+\subsection{Z3 SMT Solver}\label{subsec:z3_smt_solver}
+
+The theorem prover we chose to use is Z3 from Microsoft Research. It is an 
+efficient SMT solver that is targeted at solving problems in software analysis 
+and software verification. It supports the SMT-LIBv2 standard and it provides 
+APIs for C/C++, .NET, OCaml and Python. We used the Python API, namely Z3Py.
+
+We should note that we used it under the Microsoft Research License Agreement for 
+Non-Commerical use.
+
 
